@@ -2,17 +2,20 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public enum Season { Spring, Summer, Autumn, Winter }
+public enum DayPhase { Morning, Day, Evening, Night }
 
 public class AcademyClock : MonoBehaviour
 {
     [Header("Time Setting")]
-    [SerializeField] private float secondsPerDay = 3f;
+    [SerializeField] private float[] secondsPerPhase = { 3f, 3f, 3f, 3f };  // 인스펙터에서 수정 가능
 
+    public DayPhase currentDayPhase { get; private set; } = DayPhase.Morning;
     public int day { get; private set; } = 1;
     public int month { get; private set; } = 1;
-    public int year { get; private set; } = 1;
+    public int year { get; private set; } = 0;
     public Season currentSeason { get; private set; } = Season.Spring;
 
+    public UnityEvent<DayPhase> OnDayPhaseChanged;
     public UnityEvent OnDayPassed;
     public UnityEvent<int> OnMonthPassed;
     public UnityEvent<Season> OnSeasonChanged;
@@ -39,23 +42,36 @@ public class AcademyClock : MonoBehaviour
     public void SetPause(bool pause) => _isPaused = pause;
     public void SetTimeScale(float scale) => Time.timeScale = scale;
 
+    private void Start()
+    {
+        Debug.Log("AcademyClock Start - 코드 반영 테스트", this);
+    }
+
     private void Update()
     {
         if (_isPaused) return;
         _timer += Time.deltaTime;
-        if (_timer > secondsPerDay)
+
+        if (_timer > secondsPerPhase[(int)currentDayPhase])
         {
-            _timer -= secondsPerDay;
-            AdvanceDay();
+            _timer -= secondsPerPhase[(int)currentDayPhase];
+            AdvanceDayPhase();
         }
+    }
 
-        Debug.Log($"현재 날짜 : {year}년 {month}월 {day}일");
-        Debug.Log($"계절 : {currentSeason}");
-
+    private void AdvanceDayPhase()
+    {
+       int newDayPhase = ((int)currentDayPhase + 1) % 4;
+       currentDayPhase = (DayPhase)newDayPhase;
+       OnDayPhaseChanged?.Invoke(currentDayPhase);
+        if (currentDayPhase == DayPhase.Morning)
+            AdvanceDay();
+        Debug.Log($"{year}년 {month}월 {day}일  {currentDayPhase}");
     }
 
     private void AdvanceDay()
     {
+      
         day++;
         OnDayPassed?.Invoke();
         if (day > daysPerMonth[month-1])//0-Base
@@ -81,7 +97,8 @@ public class AcademyClock : MonoBehaviour
     private void AdvanceSeason(Season newSeason)
     {
         currentSeason = newSeason;               
-        OnSeasonChanged?.Invoke(currentSeason);  
+        OnSeasonChanged?.Invoke(currentSeason);
+        Debug.Log($"계절 : {currentSeason}");
     }
 
     private void AdvanceYear()

@@ -405,6 +405,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c691d9adeb770c045a6ff538f130ef65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AcademyClock
+  secondsPerDay: 3.04
+  OnDayPassed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnMonthPassed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSeasonChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnYearChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
