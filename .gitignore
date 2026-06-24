@@ -104,3 +104,35 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# 개인 작업 메모
+/Notes/
+/Docs/Private/
+
+# 로컬 테스트용 데이터
+/Assets/_Local/
+/Assets/_TestAssets/
+/Assets/ThirdPartyLocal/
+
+# 구매 에셋 - 저장소 업로드 금지
+/Assets/AssetStore/
+/Assets/PaidAssets/
+/Assets/ThirdParty/Paid/
+
+# 빌드 결과물
+/*.zip
+/*.apk
+/*.aab
+/*.exe
+/*.app
+/*.dmg
+
+# IDE / OS
+.vs/
+.vscode/
+*.csproj
+*.sln
+*.user
+*.userprefs
+.DS_Store
+Thumbs.db
