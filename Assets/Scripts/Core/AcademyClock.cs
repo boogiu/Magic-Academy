@@ -42,9 +42,9 @@ public class AcademyClock : MonoBehaviour
     public void SetPause(bool pause) => _isPaused = pause;
     public void SetTimeScale(float scale) => Time.timeScale = scale;
 
-    private void Start()
+    private void Awake()
     {
-        Debug.Log("AcademyClock Start - 코드 반영 테스트", this);
+        currentSeason = seasonPerMonth[month - 1];
     }
 
     private void Update()
@@ -66,7 +66,6 @@ public class AcademyClock : MonoBehaviour
        OnDayPhaseChanged?.Invoke(currentDayPhase);
         if (currentDayPhase == DayPhase.Morning)
             AdvanceDay();
-        Debug.Log($"{year}년 {month}월 {day}일  {currentDayPhase}");
     }
 
     private void AdvanceDay()
@@ -96,9 +95,8 @@ public class AcademyClock : MonoBehaviour
 
     private void AdvanceSeason(Season newSeason)
     {
-        currentSeason = newSeason;               
-        OnSeasonChanged?.Invoke(currentSeason);
-        Debug.Log($"계절 : {currentSeason}");
+        currentSeason = seasonPerMonth[month - 1];
+        OnSeasonChanged?.Invoke(currentSeason); 
     }
 
     private void AdvanceYear()
