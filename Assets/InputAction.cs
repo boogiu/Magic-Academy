@@ -109,6 +109,15 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Click"",
+                    ""type"": ""Button"",
+                    ""id"": ""0dac43bf-ca79-46e8-8b57-38bdbc26a312"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -133,6 +142,17 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""CloseUI"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""17fed3ae-2d70-420c-bada-a7725e783ef0"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Click"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -143,6 +163,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_GamePlay = asset.FindActionMap("GamePlay", throwIfNotFound: true);
         m_GamePlay_OpenContextMenu = m_GamePlay.FindAction("OpenContextMenu", throwIfNotFound: true);
         m_GamePlay_CloseUI = m_GamePlay.FindAction("CloseUI", throwIfNotFound: true);
+        m_GamePlay_Click = m_GamePlay.FindAction("Click", throwIfNotFound: true);
     }
 
     ~@GameInputActions()
@@ -225,6 +246,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private List<IGamePlayActions> m_GamePlayActionsCallbackInterfaces = new List<IGamePlayActions>();
     private readonly InputAction m_GamePlay_OpenContextMenu;
     private readonly InputAction m_GamePlay_CloseUI;
+    private readonly InputAction m_GamePlay_Click;
     /// <summary>
     /// Provides access to input actions defined in input action map "GamePlay".
     /// </summary>
@@ -244,6 +266,10 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "GamePlay/CloseUI".
         /// </summary>
         public InputAction @CloseUI => m_Wrapper.m_GamePlay_CloseUI;
+        /// <summary>
+        /// Provides access to the underlying input action "GamePlay/Click".
+        /// </summary>
+        public InputAction @Click => m_Wrapper.m_GamePlay_Click;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -276,6 +302,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @CloseUI.started += instance.OnCloseUI;
             @CloseUI.performed += instance.OnCloseUI;
             @CloseUI.canceled += instance.OnCloseUI;
+            @Click.started += instance.OnClick;
+            @Click.performed += instance.OnClick;
+            @Click.canceled += instance.OnClick;
         }
 
         /// <summary>
@@ -293,6 +322,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @CloseUI.started -= instance.OnCloseUI;
             @CloseUI.performed -= instance.OnCloseUI;
             @CloseUI.canceled -= instance.OnCloseUI;
+            @Click.started -= instance.OnClick;
+            @Click.performed -= instance.OnClick;
+            @Click.canceled -= instance.OnClick;
         }
 
         /// <summary>
@@ -347,5 +379,12 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCloseUI(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Click" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnClick(InputAction.CallbackContext context);
     }
 }

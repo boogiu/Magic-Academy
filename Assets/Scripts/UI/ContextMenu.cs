@@ -9,12 +9,6 @@ public class ContextMenu : MonoBehaviour, IClosableUI
     [SerializeField]
     private UIManager uiManager;
 
-    [Header("Buttons")]
-    [SerializeField]
-    private Button facilityButton;
-
-    private Coroutine moveCoroutine;
-
     [Header("Animations")]
     [SerializeField]
     private RectTransform visualRoot;
@@ -25,6 +19,7 @@ public class ContextMenu : MonoBehaviour, IClosableUI
     [SerializeField]
     private EaseType easeType = EaseType.Linear;
 
+    private Coroutine moveCoroutine;
     private Vector2 openedPosition;
     private Vector2 closedPosition;
 
@@ -42,13 +37,12 @@ public class ContextMenu : MonoBehaviour, IClosableUI
     }
     private void OnEnable()
     {
-        Debug.Log("ContextMenu OnEnable");
     }
 
     private void OnDisable()
     {
-        Debug.Log($"ContextMenu OnDisable\n{System.Environment.StackTrace}");
     }
+
     public void OpenContextMenu()
     {
         gameObject.SetActive (true);
@@ -61,8 +55,10 @@ public class ContextMenu : MonoBehaviour, IClosableUI
         moveCoroutine= StartCoroutine(MoveCoroutine(closedPosition,openedPosition,true));
         uiManager?.AddStack(this);
     }
-    public void Close()
+    public bool Close()
     {
+        if (!gameObject.activeInHierarchy) return false; //юс╫ц ╪Ш╠Х ╩Себ
+
         if (moveCoroutine != null)
         {
             StopCoroutine(moveCoroutine);
@@ -72,6 +68,8 @@ public class ContextMenu : MonoBehaviour, IClosableUI
         moveCoroutine = StartCoroutine(
             MoveCoroutine(visualRoot.anchoredPosition, closedPosition, false)
         );
+
+        return true;
     }
 
     private IEnumerator MoveCoroutine(

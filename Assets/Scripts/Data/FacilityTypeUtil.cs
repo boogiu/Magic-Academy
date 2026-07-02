@@ -2,7 +2,7 @@ using UnityEngine;
 
 public enum FacilityType
 {
-    Path,
+    LandScape,
     Classroom,
     Library
 }

@@ -41,8 +41,11 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Road
+  - name: Path
     uniqueID: 3556404921
+    locked: 0
+  - name: Facility
+    uniqueID: 609027131
     locked: 0
   m_RenderingLayers:
   - Default

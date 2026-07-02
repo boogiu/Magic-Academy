@@ -67,14 +67,21 @@ public class MovealbePanel : MonoBehaviour, IClosableUI
         uiManager?.AddStack(this);
     }
 
-    public void Close()
+    public bool Close()
     {
-        if (nowState == openState.Closed) return;
+        if (nowState == openState.Closed) 
+            return false;
+
+        if (nowState == openState.Opened && !gameObject.activeInHierarchy) 
+            return false; //юс╫ц ╪Ш╠Х ╩Себ
+
         StartMove(
             visualRoot.anchoredPosition,
             closedPosition,
             false
         );
+
+        return true;
     }
 
     private void StartMove(
