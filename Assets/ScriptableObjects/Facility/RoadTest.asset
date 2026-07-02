@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: RoadTest
   m_EditorClassIdentifier: Assembly-CSharp::FacillityData
   itemName: "\uAE30\uBCF8 \uB545"
+  itemCost: 0
   sprite: {fileID: -1518674234, guid: 49a25573888b0e643ab91ae019c03ac1, type: 3}
   facilityType: 0
   size: {x: 1, y: 1}
-  buildCost: 0
+  tile: {fileID: 11400000, guid: 31ebb828459ed684f8cbf2d539d6e71b, type: 2}
