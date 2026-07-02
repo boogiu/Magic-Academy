@@ -84,7 +84,7 @@ public class ItemCategoryPanel : MonoBehaviour
         for (int i = 0; i < list.Count; ++i)
         {
             itemButtons[i].gameObject.SetActive(true);
-            itemButtons[i].InjectDate(list[i]);
+            itemButtons[i].InjectData(list[i]);
         }
     }
 
