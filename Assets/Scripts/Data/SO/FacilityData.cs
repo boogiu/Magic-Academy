@@ -8,6 +8,9 @@ public class FacilityData : BaseItemData
     public FacilityType facilityType;
     public Vector2Int size;
 
+    [Header("°Ç¹°")]
+    public GameObject prefab;
+
     public override void OnSelected()
     {
        EventBus.Raise(new ItemSelectedEvent(this));

@@ -84,8 +84,10 @@ public class FacilitySystem : MonoBehaviour
         }
 
         Vector3 spawnPos = GetFootprintOriginWorldPos(originCell, currentFacilityData.size);
-        //GameObject placed = Instantiate(currentFacilityData.prefab, spawnPos, Quaternion.identity);
-        GameObject placed = Instantiate(previewPrefab.gameObject, spawnPos, Quaternion.identity);
+        if (currentFacilityData.prefab == null) return;
+
+        GameObject placed = Instantiate(currentFacilityData.prefab, spawnPos, Quaternion.identity);
+        //GameObject placed = Instantiate(previewPrefab.gameObject, spawnPos, Quaternion.identity);
 
         foreach (var cell in footprintCells)
         {
