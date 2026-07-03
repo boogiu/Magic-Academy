@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28cdbd88a015a2940bb9ca1b618f6968, type: 3}
   m_Name: RoadTest
   m_EditorClassIdentifier: Assembly-CSharp::FacillityData
-  itemName: "\uB098\uBB34"
-  itemCost: 0
-  sprite: {fileID: 4922876216639474808, guid: b0aadc4c50db679489a23f85db2a8ee6, type: 3}
-  facilityType: 0
-  size: {x: 2, y: 2}
+  itemName: "\uAC74\uBB3C"
+  itemCost: 20
+  sprite: {fileID: 21300000, guid: e43433cfa45d6c04aba685fcbec7e0c0, type: 3}
+  facilityType: 1
+  size: {x: 1, y: 1}
   prefab: {fileID: 6385480788055966731, guid: 7d935d417ed22a7419096700437b3da8, type: 3}
