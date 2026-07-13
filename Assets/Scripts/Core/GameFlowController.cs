@@ -15,6 +15,7 @@ public class GameFlowController : MonoBehaviour
         academyClock.SetTimeScale(scale);
     }
 
+    //퍼즈한다고 타임 스케일이 0이되진 않도록
     public void SetPause(bool pause)
     {
         academyClock.SetPause(pause);
