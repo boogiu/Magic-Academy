@@ -15,14 +15,16 @@ namespace MagicAcademy.Presentation.Testing
     {
         private DayLoopFSM _fsm;
         private WorkPhaseHandler _workPhaseHandler;
+        private DayCounter _dayCounter;
 
         private void Awake()
         {
             _workPhaseHandler = new WorkPhaseHandler(new ActionPointBudget());
-            _fsm = new DayLoopFSM(new MorningReportHandler(), _workPhaseHandler, new DayEndHandler());
+            _dayCounter = new DayCounter();
+            _fsm = new DayLoopFSM(new MorningReportHandler(), _workPhaseHandler, new DayEndHandler(_dayCounter));
             _fsm.PhaseChanged += OnPhaseChanged;
 
-            Debug.Log($"[DayLoop] 시작: {_fsm.CurrentPhase} (행동력 {_workPhaseHandler.ActionPoints.Current}/{_workPhaseHandler.ActionPoints.Maximum})");
+            Debug.Log($"[DayLoop] 시작: {_dayCounter.CurrentDay}일차 {_fsm.CurrentPhase} (행동력 {_workPhaseHandler.ActionPoints.Current}/{_workPhaseHandler.ActionPoints.Maximum})");
         }
 
         private void OnDestroy()
@@ -58,7 +60,7 @@ namespace MagicAcademy.Presentation.Testing
 
         private void OnPhaseChanged(GamePhase phase)
         {
-            Debug.Log($"[DayLoop] 페이즈 전환: {phase}");
+            Debug.Log($"[DayLoop] 페이즈 전환: {_dayCounter.CurrentDay}일차 {phase}");
         }
     }
 }
