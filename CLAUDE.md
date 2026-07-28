@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Magic Academy — a Unity 6 desk-style 2D management sim (원 계획은 탑다운 확장형 경영 게임이었으나 데스크형 2D로 재설계됨; 이전 방향은 `develop_project.v1` 브랜치에 보존). Player runs a magic school from the principal's desk: admit students, assign teachers/courses, manage limited "action points" (업무 시간) per day across a 3-phase day loop, handle events, and eventually graduate students into outcomes that feed back into reputation/economy. Full design detail lives in the GitHub Wiki, not in this repo.
 
-Read `README.md` for the full pitch, resource list, and phase roadmap. Roadmap status as of last check: Phase 0 (project setup) complete, Phase 1 (day loop FSM) in progress — the phase state machine and its action-point economy exist (see below, tracked as GitHub issues #20 and #21); the real `Presentation` bridge and UI do not yet.
+Read `README.md` for the full pitch, resource list, and phase roadmap. Roadmap status as of last check: Phase 0 (project setup) complete, Phase 1 (day loop FSM) in progress — the phase state machine, its action-point economy, and day counter exist (see below, tracked as GitHub issues #20, #21, #23); the real `Presentation` bridge and UI do not yet.
 
 ## Engine / environment
 
@@ -36,7 +36,7 @@ This follows a handler-per-state pattern (per issue #20), not a monolithic switc
 
 - **`GamePhase`** (`Core/DayLoop/GamePhase.cs`) — the 3-phase enum: `MorningReport` → `Work` → `DayEnd` → (loops back to) `MorningReport`.
 - **`IDayPhaseHandler`** (`Core/DayLoop/IDayPhaseHandler.cs`) — `Enter()` / `Tick()` / `Exit()` / `CanTransitionToNext()`. Every phase is a class implementing this.
-  - `MorningReportHandler`, `DayEndHandler` — both automatic: `CanTransitionToNext()` always returns `true` (nothing to compute yet; `DayEndHandler` is a placeholder until actual day-end settlement logic exists).
+  - `MorningReportHandler`, `DayEndHandler` — both automatic: `CanTransitionToNext()` always returns `true` (nothing to compute yet; `DayEndHandler` is a placeholder until actual day-end settlement logic exists). `DayEndHandler` owns a `DayCounter` (issue #23, `Core/DayLoop/DayCounter.cs` — `CurrentDay` starts at 1, `AdvanceDay()` increments) and advances it in `Exit()`, i.e. exactly at the DayEnd→MorningReport boundary. Same pattern as `WorkPhaseHandler`/`ActionPointBudget`: the handler owns the resource, the FSM never sees it.
   - `WorkPhaseHandler` — the only handler with real state. It owns an `ActionPointBudget` (see below), refills it on `Enter()`, and `CanTransitionToNext()` returns `true` once the budget is depleted (`Current <= 0`) *or* `RequestEarlyEnd()` has been called. This is where the "행동력 소모 시 페이즈 변경" rule actually lives — not in the FSM.
 - **`DayLoopFSM`** (`Core/DayLoop/DayLoopFSM.cs`) — holds `CurrentPhase`, maps each `GamePhase` to its handler, and exposes a single `Advance()` method: it `Tick()`s the current handler, and if `CanTransitionToNext()` is now true, calls `Exit()`/`Enter()` across the phase boundary and raises `PhaseChanged`. Callers (Presentation, or the debug harness below) drive the whole loop just by calling `Advance()` repeatedly — automatic phases fall through immediately since they're ready the instant they're entered; `Work` just sits until its handler says otherwise. `DayLoopFSM` has zero knowledge of action points or any other phase-specific concern.
 
