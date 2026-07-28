@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Magic Academy — a Unity 6 desk-style 2D management sim (원 계획은 탑다운 확장형 경영 게임이었으나 데스크형 2D로 재설계됨; 이전 방향은 `develop_project.v1` 브랜치에 보존). Player runs a magic school from the principal's desk: admit students, assign teachers/courses, manage limited "action points" (업무 시간) per day across a 3-phase day loop, handle events, and eventually graduate students into outcomes that feed back into reputation/economy. Full design detail lives in the GitHub Wiki, not in this repo.
 
-Read `README.md` for the full pitch, resource list, and phase roadmap. Roadmap status as of last check: Phase 0 (project setup) complete, Phase 1 (day loop FSM) in progress — the phase state machine, its action-point economy, day counter, and a headless simulation entry point exist (see below, tracked as GitHub issues #20, #21, #23, #24); the real `Presentation` bridge and UI do not yet.
+Read `README.md` for the full pitch, resource list, and phase roadmap. Roadmap status as of last check: Phase 0 (project setup) complete, Phase 1 (day loop FSM) close to done — the phase state machine, its action-point economy, day counter, a headless simulation entry point, and a first (temporary) Presentation debug panel all exist (see below, tracked as GitHub issues #20, #21, #23, #24, #25).
 
 ## Engine / environment
 
@@ -42,13 +42,24 @@ This follows a handler-per-state pattern (per issue #20), not a monolithic switc
 
 The action-point economy (issue #21) is a separate resource type, **`ActionPointBudget`** (`Core/Resources/ActionPointBudget.cs`) — `Current`/`Maximum`, `CanSpend(amount)`, `Spend(amount)` (returns a `SpendResult`, not an exception or a silent clamp — see `SpendResult`/`SpendFailureReason` in the same folder, reasons are `InvalidAmount` and `InsufficientActionPoints`), `Refill()`, and an `ActionPointsChanged` event. It has no idea what a `GamePhase` is; `WorkPhaseHandler` is the only thing that couples it to phase transitions. If more per-day resources show up later, follow the same shape (a standalone class under `Core/Resources/`, coupled to phase logic only via whichever handler needs it) rather than growing logic inside `DayLoopFSM` or any handler that doesn't need it.
 
-A real `Presentation`-side MonoBehaviour bridge (owns the `DayLoopFSM` + handler instances, forwards Unity events into `Advance()`/`Spend()`/`RequestEarlyEnd()`, reads state/subscribes to events for UI, no phase or resource logic of its own) still doesn't exist. In its place there's a throwaway manual-test harness, `Assets/Scripts/Presentation/Testing/DayLoopDebugTrigger.cs`: attach it to any GameObject in a scene and, in Play mode, press **Space** to spend 1 AP (if in `Work`) and call `Advance()`, or **E** to request an early end of `Work`. Every transition and spend attempt logs to the Console. Delete/replace this once the real bridge is built; it exists only to exercise the Core classes before the UI does.
-
 ### Headless simulation entry point (issue #24)
 
-**`GameSimulator`** (`Core/Simulation/GameSimulator.cs`) assembles a full `DayLoopFSM` + `WorkPhaseHandler`/`ActionPointBudget` + `DayEndHandler`/`DayCounter` stack internally — it's the thing that proves "just `Core.dll`, no Unity" can run the day loop end to end, and is meant to be reused later for bulk balance simulation. There's no real gameplay (course assignment, etc.) to spend action points on yet, so `Step()` spends 1 AP whenever the current phase is `Work` and then calls `DayLoopFSM.Advance()` — this is a deliberate placeholder policy just to make the loop self-driving; once real Work-phase actions exist, replace this with whatever actually consumes AP. `RunDays(count)` just loops `Step()` until `DayCounter.CurrentDay` reaches the target — nothing more.
+**`GameSimulator`** (`Core/Simulation/GameSimulator.cs`) assembles a full `DayLoopFSM` + `WorkPhaseHandler`/`ActionPointBudget` + `DayEndHandler`/`DayCounter` stack internally — it's the thing that proves "just `Core.dll`, no Unity" can run the day loop end to end, and is the shared entry point for both headless balance simulation and the Presentation debug panel below. Its public surface is split by intent, not merged into one method:
+- `Advance()` — a pure FSM step (no resource side effects); this is what a "next step" UI control should call.
+- `PerformAction(cost = 1)` — spends `cost` action points during `Work` (a stand-in for "did a work action" until real gameplay actions exist); no-ops (and logs) outside `Work`.
+- `EndWorkEarly()` — requests an early end of `Work` regardless of remaining AP; no-ops (and logs) outside `Work`.
+- `Step()` — `PerformAction(1)` + `Advance()` combined, used only by `RunDays(count)` as the minimal self-driving policy needed to complete a day with no real gameplay behind it yet. Once real Work-phase actions exist, `RunDays`'s policy is what should change — not `Advance`/`PerformAction`/`EndWorkEarly`, which are the stable primitives.
 
-Logging never touches `UnityEngine.Debug` (can't — `Core` has no engine reference anyway) — it goes through **`ISimulationLogger.Log(string)`** (`Core/Simulation/ISimulationLogger.cs`), injected via `GameSimulator`'s constructor. **`SimulationLog`** (`Core/Simulation/SimulationLog.cs`) is the default implementation, collecting messages into an `Entries` list — useful directly in tests/headless runs. A future `Presentation`-side logger would implement the same interface and forward to `Debug.Log`.
+Logging never touches `UnityEngine.Debug` (can't — `Core` has no engine reference anyway) — it goes through **`ISimulationLogger.Log(string)`** (`Core/Simulation/ISimulationLogger.cs`), injected via `GameSimulator`'s constructor. **`SimulationLog`** (`Core/Simulation/SimulationLog.cs`) is the default implementation, collecting messages into an `Entries` list — useful directly in tests/headless runs.
+
+### Presentation debug panel (issue #25)
+
+The first real (if still temporary — "UI 아키텍처는 Phase 2에서 확정") Presentation entry point, under `Presentation/DayLoop/`:
+- **`UnityConsoleSimulationLogger`** implements `ISimulationLogger` by forwarding to `Debug.Log` — the concrete logger `GameSimulator` gets wired up with here.
+- **`DayLoopDebugPanel`** (`MonoBehaviour`) owns a `GameSimulator` instance, wires 3 `Button`s to `Advance()` / `PerformAction(1)` / `EndWorkEarly()`, and renders `{day}일차 · {phase} · 행동력 {points}` into one `TMP_Text` after every click. No phase or resource logic lives here — it only forwards clicks and reads state, same rule as everywhere else in this doc.
+- This superseded and replaced the earlier keyboard-only harness (`DayLoopDebugTrigger`), which has been deleted.
+- **The scene is not built by hand-editing `.unity` YAML** — Unity scene files are edited through the Editor (see the `.editorconfig`/naming-convention note about minimizing manual edits to Unity-generated files). `Scene_Test_DayLoop.unity` (Canvas + TMP Text + 3 Buttons + a GameObject holding `DayLoopDebugPanel` with the 4 references wired in the Inspector) needs to be created in-editor, not by this agent.
+- `Presentation.asmdef` had to gain a reference to `UnityEngine.UI` (`GUID:2bafac87e7f4b9b418d9448d219b01ab`) for `Button` — it previously only referenced `Unity.TextMeshPro` and `Unity.InputSystem`.
 
 ## Conventions
 
