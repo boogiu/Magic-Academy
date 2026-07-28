@@ -76,5 +76,78 @@ namespace MagicAcademy.Core.Tests.Simulation
             Assert.IsTrue(log.Entries.Any(entry => entry.Contains("DayEnd")));
             Assert.IsTrue(log.Entries.Any(entry => entry.Contains("MorningReport")));
         }
+
+        /// <summary>
+        /// Advance()는 순수 FSM 전진이므로 Work 페이즈에서 호출해도 행동력을 소비하면 안 됨
+        /// </summary>
+        [Test]
+        public void Advance_WhileInWork_DoesNotConsumeActionPoints()
+        {
+            var simulator = new GameSimulator(new SimulationLog());
+            simulator.Step(); // MorningReport -> Work
+            var actionPointsBefore = simulator.ActionPoints;
+
+            simulator.Advance();
+
+            Assert.AreEqual(actionPointsBefore, simulator.ActionPoints);
+            Assert.AreEqual(GamePhase.Work, simulator.CurrentPhase);
+        }
+
+        /// <summary>
+        /// 디버그 패널의 "행동 시뮬레이션" 버튼 요구사항: Work 페이즈에서 지정한 비용만큼 행동력을 소비함
+        /// </summary>
+        [Test]
+        public void PerformAction_WhileInWork_ConsumesGivenCost()
+        {
+            var simulator = new GameSimulator(new SimulationLog());
+            simulator.Step(); // MorningReport -> Work
+            var actionPointsBefore = simulator.ActionPoints;
+
+            simulator.PerformAction(2);
+
+            Assert.AreEqual(actionPointsBefore - 2, simulator.ActionPoints);
+        }
+
+        /// <summary>
+        /// Work가 아닐 때 행동 시뮬레이션을 눌러도 상태가 깨지면 안 됨 (아무 효과 없이 무시)
+        /// </summary>
+        [Test]
+        public void PerformAction_OutsideWork_HasNoEffect()
+        {
+            var simulator = new GameSimulator(new SimulationLog());
+
+            simulator.PerformAction(1);
+
+            Assert.AreEqual(GamePhase.MorningReport, simulator.CurrentPhase);
+        }
+
+        /// <summary>
+        /// 디버그 패널의 "하루 강제 종료" 버튼 요구사항: 행동력이 남아 있어도 다음 Advance에서 DayEnd로 전환됨
+        /// </summary>
+        [Test]
+        public void EndWorkEarly_WhileInWork_MovesToDayEndOnNextAdvance()
+        {
+            var simulator = new GameSimulator(new SimulationLog());
+            simulator.Step(); // MorningReport -> Work
+
+            simulator.EndWorkEarly();
+            simulator.Advance();
+
+            Assert.AreEqual(GamePhase.DayEnd, simulator.CurrentPhase);
+        }
+
+        /// <summary>
+        /// Work가 아닐 때 조기 종료를 눌러도 상태가 깨지면 안 됨 (아무 효과 없이 무시)
+        /// </summary>
+        [Test]
+        public void EndWorkEarly_OutsideWork_HasNoEffect()
+        {
+            var simulator = new GameSimulator(new SimulationLog());
+
+            simulator.EndWorkEarly();
+            simulator.Advance();
+
+            Assert.AreEqual(GamePhase.Work, simulator.CurrentPhase);
+        }
     }
 }
