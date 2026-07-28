@@ -8,12 +8,18 @@ namespace MagicAcademy.Core.Tests.DayLoop
     {
         private static DayLoopFSM CreateFsm(out WorkPhaseHandler workPhaseHandler, GamePhase startingPhase = GamePhase.MorningReport)
         {
+            return CreateFsm(out workPhaseHandler, out _, startingPhase);
+        }
+
+        private static DayLoopFSM CreateFsm(out WorkPhaseHandler workPhaseHandler, out DayCounter dayCounter, GamePhase startingPhase = GamePhase.MorningReport)
+        {
             workPhaseHandler = new WorkPhaseHandler(new ActionPointBudget());
+            dayCounter = new DayCounter();
 
             return new DayLoopFSM(
                 new MorningReportHandler(),
                 workPhaseHandler,
-                new DayEndHandler(),
+                new DayEndHandler(dayCounter),
                 startingPhase);
         }
 
@@ -102,6 +108,22 @@ namespace MagicAcademy.Core.Tests.DayLoop
 
             Assert.AreEqual(GamePhase.Work, fsm.CurrentPhase);
             Assert.AreEqual(ActionPointBudget.DEFAULT_MAXIMUM, workPhaseHandler.ActionPoints.Current);
+        }
+
+        /// <summary>
+        /// 요구사항 핵심: 하루 사이클(DayEnd -> MorningReport)이 완료될 때마다
+        /// DayCounter가 정확히 전진해야 함
+        /// </summary>
+        [Test]
+        public void FullCycle_CompletingDayEnd_AdvancesDayCounter()
+        {
+            var fsm = CreateFsm(out var workPhaseHandler, out var dayCounter, GamePhase.Work);
+            workPhaseHandler.ActionPoints.Spend(ActionPointBudget.DEFAULT_MAXIMUM);
+
+            fsm.Advance(); // Work -> DayEnd
+            fsm.Advance(); // DayEnd -> MorningReport (DayCounter 전진)
+
+            Assert.AreEqual(2, dayCounter.CurrentDay);
         }
 
         /// <summary>

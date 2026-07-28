@@ -12,9 +12,24 @@ namespace MagicAcademy.Core.Tests.DayLoop
         [Test]
         public void CanTransitionToNext_AlwaysReturnsTrue()
         {
-            var handler = new DayEndHandler();
+            var handler = new DayEndHandler(new DayCounter());
 
             Assert.IsTrue(handler.CanTransitionToNext());
+        }
+
+        /// <summary>
+        /// 요구사항 핵심: DayEnd를 벗어나 다음 MorningReport로 넘어가는 시점에
+        /// DayCounter가 전진해야 함
+        /// </summary>
+        [Test]
+        public void Exit_AdvancesDayCounter()
+        {
+            var dayCounter = new DayCounter();
+            var handler = new DayEndHandler(dayCounter);
+
+            handler.Exit();
+
+            Assert.AreEqual(2, dayCounter.CurrentDay);
         }
     }
 }
