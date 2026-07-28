@@ -2,16 +2,15 @@ using System;
 
 namespace MagicAcademy.Core.DayLoop
 {
-    //<summary>
-    // GamePhase에 대한 확장 기능을 제공
-    //</summary>
-
-    public static class GamePahseExtension
+    /// <summary>
+    /// GamePhase에 대한 확장 기능을 제공
+    /// </summary>
+    public static class GamePhaseExtension
     {
-        // <summary>
-        // 해당 페이즈가 플레이어의 입력에 따라 움직이는 지 판별
-        // </summary>
-        public static bool IsAutomatic(DayLoop.GamePhase gamePhase)
+        /// <summary>
+        /// 해당 페이즈가 플레이어의 입력에 따라 움직이는 지 판별
+        /// </summary>
+        public static bool IsAutomatic(GamePhase gamePhase)
         {
             return gamePhase switch
             {

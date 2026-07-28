@@ -11,7 +11,7 @@ namespace MagicAcademy.Core.DayLoop
         MorningReport = 0,
         /// <summary>
         /// 행동력을 소비하여 학교 운영 결정을 내리는 페이즈
-        /// </summary
+        /// </summary>
         Work = 1,
         /// <summary>
         /// 수업, 재정, 미처리 업무와 야간 사건을 자동으로 정산하는 페이즈
